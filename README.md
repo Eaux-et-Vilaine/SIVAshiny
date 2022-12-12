@@ -1,2 +1,2 @@
 # SIVAshiny
-shiny deployment for SIAV
+shiny deployment for SIVA
