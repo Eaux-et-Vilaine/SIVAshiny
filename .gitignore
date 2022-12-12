@@ -37,3 +37,15 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+.Rproj.user
+.httr-oauth
+.DS_Store
+
+
+# Eclipse
+.here
+.project
+.settings
+
+
