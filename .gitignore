@@ -49,3 +49,8 @@ vignettes/*.pdf
 .settings
 
 
+# not shared
+inst/golem-config.yml
+
+
+/SIVAshiny.Rproj

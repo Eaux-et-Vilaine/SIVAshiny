@@ -18,6 +18,30 @@
 ## install.package('attachment') # if needed.
 attachment::att_amend_desc()
 
+## golem config
+
+amend_golem_config(
+    key = "hostmysql.", 
+    value = "xxxxxxxxxxxxx"
+)
+amend_golem_config(
+  key = "pwdmysql.", 
+  value = "xxxxxxxxxxxxx"
+)
+amend_golem_config(
+  key = "pwdmysql.", 
+  value = "xxxxxxxxxxxxxx"
+)
+amend_golem_config(
+  key = "dbnamemysql.", 
+  value = "archive_IAV"
+)
+amend_golem_config(
+  key = "portmysl.", 
+  value = "3306"
+)
+get_golem_config("hostmysql.")
+
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "name_of_module1", with_test = TRUE) # Name of the module

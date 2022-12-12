@@ -1,9 +1,13 @@
 Package: SIVAshiny
 Title: Systeme d'Information pour la Vilaine Aval
 Version: 0.0.0.9000
-Authors@R: person('Briand', 'Cédric', email = 'cedric.briand@eaux-et-vilaine.fr', role = c('cre', 'aut'))
+Authors@R: c(
+    person("Cédric", "Briand", , "cedric.briand@eaux-et-vilaine.bzh", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-7721-5195")),
+    person("Anthony", "De Burghrave", , "anthony.deburghrave@eaux-et-vilaine.bzh", role = "aut")
+  )
 Description: PAckage shiny
-License: What license is it under?
+License: License: GPL (>= 3)
 Imports: 
     config (>= 0.3.1),
     golem (>= 0.3.3),
