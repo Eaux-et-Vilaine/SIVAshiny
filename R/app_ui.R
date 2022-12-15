@@ -3,16 +3,125 @@
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
-#' @noRd
+#' @noRd 
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
+    #fluidPage(
+    #  shinythemes::themeSelector(),
+    # tags$head(
+    #   tags$link(rel = "shortcut icon", href = app_sys("favicon.ico")),
+    #   #-- biblio js ----
+    #   tags$link(rel="stylesheet", type = "text/css",
+    #             href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"),
+    #   tags$link(rel="stylesheet", type = "text/css",
+    #             href = "https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro")
+    # ),
+    ##-- Logo ----
+    # list(tags$head(HTML('<link rel="icon", href="favicon.png",
+    #                     type="image/png" />'))),
+    # div(style="padding: 1px 0px; width: '100%'",
+    #     titlePanel(
+    #       title="", windowTitle = "SIVA"
+    #     )
+    # ),
+    ##-- Favicon ----
     # Your application UI logic
-    fluidPage(
-      h1("SIVAshiny")
+    navbarPage(
+      theme = bslib::bs_theme(version = 5, primary = "#00218f", success = "#33b5ff", 
+                              info = "#00C9C4", warning = "#ffb428", base_font = "Segoe UI Symbol", 
+                              heading_font = "Georgia", font_scale = NULL, `enable-gradients` = TRUE, 
+                              bootswatch = "cerulean"),
+      title=
+        # div(id="img-id",
+        #     img(src=app_sys("favicon.png"),              
+        #         height =  "200px"),
+        #     style = "position: fixed;
+        #           right: 10px;
+        #           top: 5px;"
+        # ),
+        span(
+          img(src=app_sys("favicon.png"),              
+              height =  "200px"),
+          "SIVA"
+        ),
+      id = "navbar",
+      windowTitle = "Windows title",
+      # TODO utiliser shinythemes
+      #tabPanel("Vilaine aval",
+      #                fluidPage(theme = shinythemes::shinytheme("flatly")),
+      tabPanel("Vilaine aval",
+               sidebarLayout(
+                 sidebarPanel(width = 4,
+                              dateInput("datedebut", label = h5("date de début :"), value = Sys.Date()-20),
+                              dateInput("datefin", label = h5("date de fin :"),  value =Sys.Date()),
+                              checkboxGroupInput("choix_station", 
+                                                 label = h5("Choisissez les stations :"),
+                                                 choices = list(
+                                                   "Niveau Redon" = 1, 
+                                                   "Niveau Barrage" = 2,
+                                                   "Débit Pont de Cran" = 3,
+                                                   "Niveau mer" = 4),
+                                                 inline=FALSE,
+                                                 selected = c(1,2,3))
+                 ),
+                 mainPanel(width = 8,
+                           title="Main panel",
+                           h3("Graphiques de niveaux"),
+                           shinycssloaders::withSpinner(plotOutput("plot_niveaux")),
+                           h3("Graphiques de debit"),
+                           shinycssloaders::withSpinner(plotOutput("plot_debits")),
+                           h3("Bilan"),
+                           shinycssloaders::withSpinner(DT::DTOutput("data_table_bilan"))
+                 )
+               )
+      ),
+      tabPanel("Barrage Arzal",
+               verbatimTextOutput("summary")
+      ),
+      tabPanel("Isac",
+               
+      ),
+      tabPanel("Trevelo",
+               
+      ),
+      tabPanel("Passe à poissons",
+               
+      ),
+      tabPanel("Autres astreintes",
+               
+      ),
+      navbarMenu("A propos",
+                 tabPanel("Table",
+                          DT::dataTableOutput("table")
+                 ),
+                 tabPanel("About",
+                          fluidRow(
+                            column(6,
+                                   # changer au deployement
+                                   includeMarkdown(app_sys("app/www/about.md"))
+                            ),
+                            column(3,
+                                   img(class="img-polaroid",
+                                       src=paste0("http://upload.wikimedia.org/",
+                                                  "wikipedia/commons/9/92/",
+                                                  "1919_Ford_Model_T_Highboy_Coupe.jpg")),
+                                   tags$small(
+                                     "Source: Photographed at the Bay State Antique ",
+                                     "Automobile Club's July 10, 2005 show at the ",
+                                     "Endicott Estate in Dedham, MA by ",
+                                     a(href="http://commons.wikimedia.org/wiki/User:Sfoskett",
+                                       "User:Sfoskett")
+                                   )
+                            )
+                          )
+                 )
+      )
     )
   )
+
+  
 }
 
 #' Add external Resources to the Application
@@ -28,7 +137,7 @@ golem_add_external_resources <- function() {
     "www",
     app_sys("app/www")
   )
-
+  
   tags$head(
     favicon(),
     bundle_resources(

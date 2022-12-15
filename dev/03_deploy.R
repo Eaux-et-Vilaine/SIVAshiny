@@ -18,6 +18,8 @@
 devtools::check()
 rhub::check_for_cran()
 
+
+
 # Deploy
 
 ## Local, CRAN or Package Manager ----
@@ -38,3 +40,5 @@ golem::add_dockerfile_with_renv()
 ## If you want to deploy to ShinyProxy
 golem::add_dockerfile_with_renv_shinyproxy()
 
+
+styler::style_pkg("C:\\workspace\\SIVAshiny", strict = FALSE)

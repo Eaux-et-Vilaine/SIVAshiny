@@ -2,19 +2,36 @@ Package: SIVAshiny
 Title: Systeme d'Information pour la Vilaine Aval
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Cédric", "Briand", , "cedric.briand@eaux-et-vilaine.bzh", role = c("aut", "cre"),
+    person(given="Cédric", family="Briand",middle=NULL ,  email="cedric.briand@eaux-et-vilaine.bzh", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7721-5195")),
-    person("Anthony", "De Burghrave", , "anthony.deburghrave@eaux-et-vilaine.bzh", role = "aut")
+    person(given="Anthony", family="De Burghrave", middle=NULL, "anthony.deburghrave@eaux-et-vilaine.bzh", role = "aut")
   )
 Description: PAckage shiny
 License: License: GPL (>= 3)
 Imports: 
+    bslib,
     config (>= 0.3.1),
+    dplyr,
+    DT,
+    ggthemes,
     golem (>= 0.3.3),
-    shiny (>= 1.7.1)
+    magrittr,
+    pool,
+    rlang,
+    shinipsum,
+    shiny (>= 1.7.1),
+    shinybusy,
+    shinycssloaders,
+    shinydashboard,
+    shinydashboardPlus,
+    shinyjs,
+    shinyWidgets,
+    SIVA (>= 0.0.1.9000),
+    spsComps,
+    tibble
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.2
 URL: https://github.com/Eaux-et-Vilaine/SIVAshiny
 BugReports: https://github.com/Eaux-et-Vilaine/SIVAshiny/issues
 Suggests: 
@@ -22,3 +39,5 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Language: en-US
+Remotes: 
+    git::https//github.com/Eaux-et-Vilaine/SIVA/stacomirtools.git@main
