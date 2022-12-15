@@ -24,9 +24,9 @@ amend_golem_config(
     key = "hostmysql.", 
     value = "xxxxxxxxxxxxx"
 )
-amend_golem_config(
-  key = "pwdmysql.", 
-  value = "xxxxxxxxxxxxx"
+golem::amend_golem_config(
+  key = "usermysql.", 
+  value = "umysql_virus"
 )
 amend_golem_config(
   key = "pwdmysql.", 
@@ -44,8 +44,8 @@ get_golem_config("hostmysql.")
 
 
 
-usethis::use_package("shinydashboard")
-usethis::use_package("shinydashboardPlus")
+#usethis::use_package("shinydashboard")
+#usethis::use_package("shinydashboardPlus")
 usethis::use_package("shinyjs")
 usethis::use_package("shinyWidgets")
 usethis::use_package("spsComps")
@@ -57,18 +57,20 @@ usethis::use_package("shinybusy")
 usethis::use_package("magrittr")
 usethis::use_package("tibble")
 usethis::use_package("ggthemes")
-usethis::use_package("shinythemes") # deprecated
+#usethis::use_package("shinythemes") # deprecated
 usethis::use_package("bslib")
 usethis::use_package("shinycssloaders")
 usethis::use_package("DT")
+usethis::use_package("tidyr")
+usethis::use_package("rAmCharts")
 usethis::use_dev_package("SIVA", 
                          remote = "Remotes: git::https//github.com/Eaux-et-Vilaine/SIVA/stacomirtools.git@main" )
                      
                     
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "name_of_module1", with_test = FALSE) # Name of the module
-golem::add_module(name = "name_of_module2", with_test = TRUE) # Name of the module
+golem::add_module(name = "mod_barrage", with_test = FALSE) # Name of the module
+golem::add_module(name = "mod_vilaine_aval", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

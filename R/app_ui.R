@@ -34,52 +34,25 @@ app_ui <- function(request) {
                               heading_font = "Georgia", font_scale = NULL, `enable-gradients` = TRUE, 
                               bootswatch = "cerulean"),
       title=
-        # div(id="img-id",
-        #     img(src=app_sys("favicon.png"),              
-        #         height =  "200px"),
-        #     style = "position: fixed;
-        #           right: 10px;
-        #           top: 5px;"
-        # ),
-        span(
-          img(src=app_sys("favicon.png"),              
-              height =  "200px"),
-          "SIVA"
+        div(id="img-id",
+            img(src=system.file("app/www/favicon.png", package = "SIVAshiny"),
+                height =  "100px"),
+            # style = "position: fixed;
+            #       left: 10px;
+            #       top: 5px;",
+            "SIVA"
         ),
-      id = "navbar",
-      windowTitle = "Windows title",
-      # TODO utiliser shinythemes
-      #tabPanel("Vilaine aval",
-      #                fluidPage(theme = shinythemes::shinytheme("flatly")),
-      tabPanel("Vilaine aval",
-               sidebarLayout(
-                 sidebarPanel(width = 4,
-                              dateInput("datedebut", label = h5("date de début :"), value = Sys.Date()-20),
-                              dateInput("datefin", label = h5("date de fin :"),  value =Sys.Date()),
-                              checkboxGroupInput("choix_station", 
-                                                 label = h5("Choisissez les stations :"),
-                                                 choices = list(
-                                                   "Niveau Redon" = 1, 
-                                                   "Niveau Barrage" = 2,
-                                                   "Débit Pont de Cran" = 3,
-                                                   "Niveau mer" = 4),
-                                                 inline=FALSE,
-                                                 selected = c(1,2,3))
-                 ),
-                 mainPanel(width = 8,
-                           title="Main panel",
-                           h3("Graphiques de niveaux"),
-                           shinycssloaders::withSpinner(plotOutput("plot_niveaux")),
-                           h3("Graphiques de debit"),
-                           shinycssloaders::withSpinner(plotOutput("plot_debits")),
-                           h3("Bilan"),
-                           shinycssloaders::withSpinner(DT::DTOutput("data_table_bilan"))
-                 )
-               )
-      ),
-      tabPanel("Barrage Arzal",
-               verbatimTextOutput("summary")
-      ),
+        # span(
+        #   img(src=app_sys("favicon.png"),              
+        #       height =  "200px"),
+        #   "SIVA"
+        # ),
+      # id = "navbar",
+      # windowTitle = "window main navbar",
+      # ---- modules are tabpanels
+      
+      mod_vilaine_aval_ui("mod_vilaine_aval_1"),
+      mod_barrage_ui("mod_barrage_1"),
       tabPanel("Isac",
                
       ),
