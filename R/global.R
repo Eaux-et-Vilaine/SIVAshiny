@@ -7,6 +7,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(rAmCharts)
+library(stringr)
 #source("R/app_config.R")
 pool <- pool::dbPool(
   drv = RMariaDB::MariaDB(),
@@ -16,5 +17,5 @@ pool <- pool::dbPool(
   password = get_golem_config("pwdmysql."),
   port=get_golem_config("portmysql.")
 )
-
+on.exit(poolClose(pool))
 
