@@ -12,8 +12,7 @@ options(shiny.port = httpuv::randomPort())
 
 # Document and reload your package
 golem::document_and_reload()
-#options(shiny.fullstacktrace = TRUE)
-#options(shiny.fullstacktrace = FALSE)
+
 # Run the application
 run_app()
 
