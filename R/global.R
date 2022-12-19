@@ -7,6 +7,10 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(rAmCharts)
+library(plotly)
+library(dplyr)
+library(stringr)
+#library(crosstalk)
 #source("R/app_config.R")
 pool <- pool::dbPool(
   drv = RMariaDB::MariaDB(),
