@@ -5,37 +5,43 @@
 #' @import shiny
 #' @noRd
 app_server <- function(input, output, session) {
-  # Your application server logic
-  #bslib::bs_themer()
+  #bslib::bs_themer() à décommenter pour choisir les thèmes
+  # Vilaine aval ---------------------------------
   mod_vilaine_aval_server("mod_vilaine_aval_1")
-  v <- reactiveValues(debits = NULL, niveaux = NULL, Qj=NULL)
   
+
+  
+  # Barrage, calculs utilisant les fonctions SIVA.
+  # plus données toutes les dix minutes
+  # Ce graphe ne se trouve pas dans un module, parce que les plotly et les reactives 
+  # ne fonctionnent plus
+  v <- reactiveValues(debits = NULL, niveaux = NULL, Qj=NULL, Q12345=NULL)
   observeEvent(input$bar_bttn,{
         #browser()
         #shinyCatch({
         validate(need(exists("pool"), "Il faut une connexion vers la base"))
         shinybusy::show_modal_spinner(text="chargement base") # show the modal window
         # on rajoute un jour avant
-        debit_barrage <- SIVA::rawdata2020
-#            load_debit_barrage (debut = as.POSIXct(
-#                    strptime(input$bar_datedebut-1, format = "%Y-%m-%d")
-#                ),
-#                fin = as.POSIXct(
-#                    strptime(input$bar_datefin, format = "%Y-%m-%d")
-#                ),
-#                con=pool)
+        #debit_barrage <- SIVA::rawdata2020
+        debit_barrage <- load_debit_barrage (debut = as.POSIXct(
+                    strptime(input$bar_datedebut-1, format = "%Y-%m-%d")
+                ),
+                fin = as.POSIXct(
+                   strptime(input$bar_datefin, format = "%Y-%m-%d")
+                ),
+                con=pool)
         shinybusy::remove_modal_spinner() # remove it when done
         shinybusy::show_modal_spinner(text="calcul")
         debit_barrage <-traitement_siva(debit_barrage)
         Q12345 <- debit_total(param, param0 = param, debit_barrage)
         Q12345$tot_vol <- debit_barrage$tot_vol # volume total au barrage d'Arzal = somme des totaliseurs de volume
+        v$Q12345 <- Q12345
         Qj <- debit_journalier(debit_barrage=debit_barrage, type = "recalcule")
         Q2j <- debit_journalier(debit_barrage=debit_barrage, type = "barrage_volume")
         Q3j <- debit_journalier(debit_barrage=debit_barrage, type = "barrage_debit")
         stopifnot(nrow(Qj) == nrow(Q2j))
         stopifnot(nrow(Q2j) == nrow(Q3j))
-        QV <- bind_cols(Qj, Q2j %>% select(-date), Q3j %>% select(-date))
-        
+        QV <- bind_cols(Qj, Q2j %>% select(-date), Q3j %>% select(-date))        
         
         v$Qj <- QV
         niveaux <- debit_barrage %>% select(horodate, niveauvilaineb,
@@ -47,7 +53,6 @@ app_server <- function(input, output, session) {
                 names_prefix = "niveau",
                 values_to = "niveau"
             )
-        niveaux$nms=str_c(niveaux$source,"_", 1:nrow(niveaux))
         v$niveaux <- niveaux
         debits_vannes <-
             Q12345 %>% select(horodate, starts_with("Qvanne")) %>%
@@ -66,7 +71,6 @@ app_server <- function(input, output, session) {
                 values_to = "Q"
             )
         debits <- bind_rows(debits_vannes, debits_volets)
-        debits$nms=str_c(debits$source,"_", 1:nrow(debits))
         v$debits <- debits
 #              g1 <- ggplot()+ geom_line(aes(x=horodate, y=niveau, col=source), data=niveaux) + theme_bw()
 #              g2 <- ggplot() +  geom_line(aes(x=horodate, y=Q, col=source), data=bind_rows(debits_vannes, debits_volets)) + 
@@ -77,8 +81,11 @@ app_server <- function(input, output, session) {
         
         
       },    ignoreInit = TRUE)
+      
+# Barrage, graphique des niveaux toutes les dix minutes.
   
-  output$bar_plotly_niveaux <- plotly::renderPlotly({
+  output$bar_plotly_niveau_10 <- plotly::renderPlotly({  
+        validate(need(input$bar_bttn, "choisir des dates"))
         if(is.null(v$niveaux)){
           return()
         } else {
@@ -90,27 +97,21 @@ app_server <- function(input, output, session) {
                   x= ~horodate,
                   y= ~niveau,
                   height = height, 
-                  width = width,
-                  customdata = ~ nms
+                  width = width
               ) %>%
               plotly::add_markers( color = ~source, colors = "Set1") %>%
               plotly::layout(dragmode = "select", selectdirection = "h") %>%
               event_register("plotly_selected")
-          
-#                    brush <- plotly::event_data("plotly_brushing", source = "bar_plotly_debits")
-#                    if (is.null(brush)) return(p)
-#                    cat("brush activated")
-#                    browser()
-#                    p %>%
-#                        dplyr::filter(between(horodate, brush$x[1], brush$x[2])) %>%
-#                        plotly::add_lines() %>%                       
-#                        plotly::event_register('plotly_brushing')
-        }
+                }
+        
       })
   
+# barrage : graphiqueplotly des débits par 10 minutes
+# Un évennement va déclencher la recomposition du graphique avec un rectangle
+# indiquant la période sélectionnée dans plotly_niveau_10
   
-  
-  output$bar_plotly_debits <- plotly::renderPlotly({
+  output$bar_plotly_debit_10 <- plotly::renderPlotly({
+        validate(need(input$bar_bttn, "choisir des dates"))
         if(is.null(v$debits)){
           return()
         } else {
@@ -124,29 +125,56 @@ app_server <- function(input, output, session) {
               width = width,
               color = ~source, 
               colors = randomcoloR::distinctColorPalette(length(unique(v$debits$source))),
-              customdata = ~ nms,
               mode = "markers")
           if (is.null(eventSelected)) {
             return(p) 
           } else {
             #browser()
-    
-            p <- layout(p=p ,title = 'Données sélectionnées',
-                    shapes = list(
-                        list(type = "rect",
-                            fillcolor = "blue", line = list(color = "blue"), opacity = 0.3,
-                            x0 =  min(eventSelected$x), x1 = max(eventSelected$x), xref = "x",
-                            y0 = 0, y1 = max(v$debits$Q), yref = "y"))
-                )
-          
             
+            p <- layout(p=p ,title = sprintf("Sélection du \n %s au %s",min(eventSelected$x),max(eventSelected$x)),
+                shapes = list(
+                    list(type = "rect",
+                        fillcolor = "blue", line = list(color = "blue"), opacity = 0.3,
+                        x0 =  min(eventSelected$x), x1 = max(eventSelected$x), xref = "x",
+                        y0 = 0, y1 = max(v$debits$Q), yref = "y"))
+            )              
             return(p) 
-          }
-#                    p %>%
-#                        dplyr::filter(between(horodate, sel$x[1], sel$x[2])) %>%
-#                        plotly::add_lines() 
+          }           
+        }        
+      })
+  
+  # Graphique des volumes journaliers sur la période sélectionnée,
+  # voir SIVA plotly_volume_jour
+  
+  output$bar_plotly_volume_jour <- plotly::renderPlotly({
+        validate(need(input$bar_bttn, "choisir des dates"))
+        if(is.null(v$Qj)){
+          return()
+        } else { 
+          p <- SIVA::plotly_volume_jour (QV=v$Qj) # dans la fonction il y a source = "volume_jour"
+          
+        }
+      }
+  )
+  
+  # Plotly des valeurs de la journée sélectionnée
+  # eventclick$customdata renvoie la date 
+  # le customdata est passé dans le dataset généré pour le graphe plotly_volume_jour
+  # voir plotly_volume_jour
+  output$bar_plotly_journalier_vanne_volet <- plotly::renderPlotly({
+        validate(need(input$bar_bttn, "choisir des dates"))
+        if(is.null(v$Q12345)){
+          return()
+        } else { 
+          eventclick <- event_data("plotly_click", source = "volume_jour")
+          validate(need(!is.null(eventclick),"cliquer sur un élément du graphe des volumes \n pour voir le détail des débits journaliers"))
+          SIVA::plotly_journalier_vanne_volet(date = eventclick$customdata, debit_traite=v$Q12345)
         }
       })
+  
+ # Tableau de données 
+ # Utilise la variable réactive v$Qj = tableau des données journalières
+  
   output$bar_Qj <- DT::renderDT({
         if(is.null(v$Qj)){
           return()
@@ -170,49 +198,4 @@ app_server <- function(input, output, session) {
           
         }
       })
-  
-  output$click <- renderPrint({
-        d <- event_data("plotly_click")
-        if (is.null(d)) "Click events appear here (double-click to clear)" else d
-      })
-  
-  
-  output$selecting <- renderPrint({
-        d <- event_data("plotly_selecting")
-        if (is.null(d)) "Brush points appear here (double-click to clear)" else d
-      })
-  
-  
-  output$selected <- renderPrint({
-        d <- event_data("plotly_selected")
-        if (is.null(d)) "Brushed points appear here (double-click to clear)" else d
-      })
-  
-  eventSelecing <- reactive(event_data("plotly_selecting", source = "bar_plotly_niveaux")) #%>% debounce(500)
-  observeEvent(eventSelecing,
-      {
-        #browser()
-        d <-  eventSelecing()
-        if (rlang::is_empty(d)) {
-          return()
-        }
-        if (!is.null(d) || rlang::is_empty(d)) {
-          browser()
-          new_ids <- c(ids(), evt %>% pull(key)) %>% unique()
-          ids(new_ids) 
-        }
-        
-        p <- plotly::plotlyProxy("bar_plotly_debits", session)
-        # show full data if no brush exists
-        if (is.null(d)) {
-          plotly::plotlyProxyInvoke(p, "plotly", "restyle", list(v$debits$Q))
-          return()
-        }
-        debits_filter <- v$debits %>% dplyr::filter(between(horodate, brush$x[1], brush$x[2]))
-        if (nrow(d_filter) < 10) return()
-        
-        
-        plotly::plotlyProxyInvoke(p, "restyle", "y", list(debits_filter$Q))
-      })
-  
 }
