@@ -1,6 +1,6 @@
 Package: SIVAshiny
 Title: Systeme d'Information pour la Vilaine Aval
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: c(
     person(given="C\u00e9dric", family="Briand",middle=NULL ,  email="cedric.briand@eaux-et-vilaine.bzh", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7721-5195")),
@@ -25,7 +25,7 @@ Imports:
     shinycssloaders,
     shinyjs,
     shinyWidgets,
-    SIVA (>= 0.0.1.9000),
+    SIVA (>= 0.1.0),
     spsComps,
     shinythemes
 Encoding: UTF-8
