@@ -29,16 +29,13 @@ installée depuis [GitHub](https://github.com/) avec:
 # install.packages("devtools")
 devtools::install_github("Eaux-et-Vilaine/SIVAshiny")
 ```
-Mais il faut un accès au package qui n'est pas public
 
-## Example
+## Exemple
 
-This is a basic example which shows you how to solve a common problem:
 
-```{r example}
+```{r example, eval=FALSE}
 library(SIVAshiny)
 SIVAshiny()
-## basic example code
 ```
 
 

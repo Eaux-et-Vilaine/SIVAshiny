@@ -26,6 +26,7 @@ rhub::check_for_cran()
 ## This will build a tar.gz that can be installed locally,
 ## sent to CRAN, or to a package manager
 devtools::build()
+devtools::build_readme()
 
 ## RStudio ----
 ## If you want to deploy on RStudio related platforms
