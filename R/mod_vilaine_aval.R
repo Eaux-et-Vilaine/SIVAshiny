@@ -121,7 +121,7 @@ mod_vilaine_aval_server <- function(id){
               # TODO use attributes(niveaux)$libelle 
              
             })
-        output$va_armchart_niveaux <- renderAmCharts({
+        output$va_armchart_niveaux <- rAmCharts::renderAmCharts({
               validate(need(!is.null(va$niveaux), "cliquez sur le bouton OK pour charger des valeurs"))
               rAmCharts::amTimeSeries(
                       va$niveaux, 
@@ -142,7 +142,7 @@ mod_vilaine_aval_server <- function(id){
                   rAmCharts::setExport(enabled = TRUE)  
             })
         
-        output$va_armchart_debits <- renderAmCharts({
+        output$va_armchart_debits <- rAmCharts::renderAmCharts({
               validate(need(!is.null(va$debits), "cliquez sur le bouton OK pour charger des valeurs"))
              rAmCharts::amTimeSeries(
                       va$debits,

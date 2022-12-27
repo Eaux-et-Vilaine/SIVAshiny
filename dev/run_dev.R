@@ -14,7 +14,7 @@ options(shiny.port = httpuv::randomPort())
 golem::document_and_reload()
 
 # Run the application
-run_app()
+SIVAshiny()
 
 
 
