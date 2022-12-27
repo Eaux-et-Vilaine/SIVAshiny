@@ -63,6 +63,7 @@ usethis::use_package("shinycssloaders")
 usethis::use_package("DT")
 usethis::use_package("tidyr")
 usethis::use_package("rAmCharts")
+usethis::use_package("plotly")
 usethis::use_dev_package("SIVA", 
                          remote = "Remotes: git::https//github.com/Eaux-et-Vilaine/SIVA/stacomirtools.git@main" )
                      
