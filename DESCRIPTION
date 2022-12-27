@@ -38,5 +38,3 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Language: en-US
-Remotes: 
-    git::https//github.com/Eaux-et-Vilaine/SIVA/stacomirtools.git@main
