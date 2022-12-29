@@ -19,11 +19,12 @@ app_server <- function(input, output, session) {
   observeEvent(input$bar_bttn,{
         #browser()
         #shinyCatch({
-        validate(need(exists("pool"), "Il faut une connexion vers la base"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+                validate(need(exists("pool"), "Il faut une connexion vers la base"))
         shinybusy::show_modal_spinner(text="chargement base") # show the modal window
         # on rajoute un jour avant
         #debit_barrage <- SIVA::rawdata2020
-        debit_barrage <- load_debit_barrage (debut = as.POSIXct(
+             debit_barrage <- load_debit_barrage (debut = as.POSIXct(
                     strptime(input$bar_datedebut-1, format = "%Y-%m-%d")
                 ),
                 fin = as.POSIXct(
@@ -85,6 +86,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_niveau_10 <- plotly::renderPlotly({  
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$niveaux)){
           return()
         } else {
@@ -111,6 +114,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_debit_10 <- plotly::renderPlotly({
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$debits)){
           return()
         } else {
@@ -147,6 +152,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_volume_jour <- plotly::renderPlotly({
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$Qj)){
           return()
         } else { 
