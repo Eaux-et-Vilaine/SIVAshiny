@@ -27,7 +27,9 @@ Imports:
     shinyWidgets,
     SIVA (>= 0.1.0),
     spsComps,
-    shinythemes
+    shinythemes,
+    pkgload,
+    randomcoloR
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2
