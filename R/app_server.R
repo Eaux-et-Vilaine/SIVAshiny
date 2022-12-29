@@ -167,6 +167,7 @@ app_server <- function(input, output, session) {
         } else { 
           eventclick <- event_data("plotly_click", source = "volume_jour")
           validate(need(!is.null(eventclick),"cliquer sur un élément du graphe des volumes \n pour voir le détail des débits journaliers"))
+          validate(need("customdata"%in%colnames(eventclick),"cliquez sur un des éléments colorés = volume (les élements en gris donnent le débit)"))
           SIVA::plotly_journalier_vanne_volet(date = eventclick$customdata, debit_traite=v$Q12345)
         }
       })
