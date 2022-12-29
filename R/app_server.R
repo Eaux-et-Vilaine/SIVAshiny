@@ -42,7 +42,6 @@ app_server <- function(input, output, session) {
         stopifnot(nrow(Qj) == nrow(Q2j))
         stopifnot(nrow(Q2j) == nrow(Q3j))
         QV <- bind_cols(Qj, Q2j %>% select(-date), Q3j %>% select(-date))        
-        
         v$Qj <- QV
         niveaux <- debit_barrage %>% select(horodate, niveauvilaineb,
                 niveaumerb) %>%

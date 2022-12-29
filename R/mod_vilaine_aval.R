@@ -6,7 +6,8 @@
 #'
 #' @noRd 
 #'
-#' @importFrom shiny NS tagList 
+#' @importFrom shiny NS tagList
+#' @importFrom randomcoloR distinctColorPalette    
 mod_vilaine_aval_ui <- function(id){
   ns <- NS(id)
   tabPanel(title="Vilaine aval",
