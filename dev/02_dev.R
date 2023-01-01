@@ -70,8 +70,9 @@ usethis::use_dev_package("SIVA",
                     
 ## Add modules ----
 ## Create a module infrastructure in R/
-golem::add_module(name = "mod_barrage", with_test = FALSE) # Name of the module
+#golem::add_module(name = "mod_barrage", with_test = FALSE) # Name of the module
 golem::add_module(name = "mod_vilaine_aval", with_test = TRUE) # Name of the module
+golem::add_module(name = "mod_passe", with_test=FALSE)
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
