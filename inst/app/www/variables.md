@@ -14,8 +14,8 @@ pour plus de détails sur les calculs. En <span style="color:red"> **rouge** </s
 |vol_bar                | <span style="color:red">Volume total du barrage : attention faux erreur dans le totaliseur de volumne de vannes</span> |
 |vol_vanne              | <span style="color:red">Volume calculé à partir du totaliseur du volume de vannes : faux</span> |
 |vol_volet              | Volume calculé à partir du totaliseur de volume des volets |
-|vol_passe              | Volume calculé pour la passe, ne prends pas en compte le noyage aval |
-|vol_siphon             | Volume caclulé pour le siphon |
+|vol_passe              | Volume calculé pour la passe, ne prends pas en compte le noyage aval, calculé à partir du débit (les volumes passe sont faux) |
+|vol_siphon             | Volume caclulé pour le siphon, calculé à partir du débit des deux siphons, les volumes siphon sont faux|
 |vol_ecluse             | Volume calculé pour les débits évacués à l'écluse, les volumes d'eau salée entrants ne sont pas calculés |
 |debit_moyen_vol_bar    | <span style="color:red">Débit moyen à partir des volumes du barrage</span> |
 |debit_moyen_vol_vanne  | <span style="color:red">Débit moyen à partir des volumes évacués par les vannes </span> |

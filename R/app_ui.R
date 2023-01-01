@@ -92,9 +92,9 @@ app_ui <- function(request) {
           tabPanel("Trevelo (x)",
           
           ),
-          tabPanel("Passe à poissons (x)",
-          
-          ),
+          mod_passe_ui("mod_passe_1"),
+          #tabPanel("Passe à poissons (x)",          
+       
           navbarMenu("A propos",
               tabPanel("Table",
                   DT::dataTableOutput("table")

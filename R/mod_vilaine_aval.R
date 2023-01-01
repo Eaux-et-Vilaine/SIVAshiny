@@ -63,7 +63,7 @@ mod_vilaine_aval_ui <- function(id){
               h3("Niveaux Vilaine"),
               shinycssloaders::withSpinner(rAmCharts::amChartsOutput(outputId = ns("va_armchart_niveaux"))),
               h3("Débits"),
-              shinycssloaders::withSpinner(rAmCharts::amChartsOutput(outputId = ns("va_armchart_debits"))),
+              shinycssloaders::withSpinner(rAmCharts::amChartsOutput(outputId = ns("va_armchart_debits")))
            
           )
       )

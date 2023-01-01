@@ -8,7 +8,7 @@ app_server <- function(input, output, session) {
   #bslib::bs_themer() à décommenter pour choisir les thèmes
   # Vilaine aval ---------------------------------
   mod_vilaine_aval_server("mod_vilaine_aval_1")
-  
+  mod_passe_server("mod_passe_1")
 
   
   # Barrage, calculs utilisant les fonctions SIVA.
@@ -19,11 +19,12 @@ app_server <- function(input, output, session) {
   observeEvent(input$bar_bttn,{
         #browser()
         #shinyCatch({
-        validate(need(exists("pool"), "Il faut une connexion vers la base"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+                validate(need(exists("pool"), "Il faut une connexion vers la base"))
         shinybusy::show_modal_spinner(text="chargement base") # show the modal window
         # on rajoute un jour avant
         #debit_barrage <- SIVA::rawdata2020
-        debit_barrage <- load_debit_barrage (debut = as.POSIXct(
+             debit_barrage <- load_debit_barrage (debut = as.POSIXct(
                     strptime(input$bar_datedebut-1, format = "%Y-%m-%d")
                 ),
                 fin = as.POSIXct(
@@ -85,6 +86,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_niveau_10 <- plotly::renderPlotly({  
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$niveaux)){
           return()
         } else {
@@ -111,6 +114,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_debit_10 <- plotly::renderPlotly({
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$debits)){
           return()
         } else {
@@ -147,6 +152,8 @@ app_server <- function(input, output, session) {
   
   output$bar_plotly_volume_jour <- plotly::renderPlotly({
         validate(need(input$bar_bttn, "choisir des dates"))
+        validate(need(input$bar_datefin>input$bar_datedebut, "Le temps s'écoulant de manière linéaire, la date de fin est toujours ultérieure à la date de début"))
+        
         if(is.null(v$Qj)){
           return()
         } else { 
@@ -167,6 +174,7 @@ app_server <- function(input, output, session) {
         } else { 
           eventclick <- event_data("plotly_click", source = "volume_jour")
           validate(need(!is.null(eventclick),"cliquer sur un élément du graphe des volumes \n pour voir le détail des débits journaliers"))
+          validate(need("customdata"%in%colnames(eventclick),"cliquez sur un des éléments colorés = volume (les élements en gris donnent le débit)"))
           SIVA::plotly_journalier_vanne_volet(date = eventclick$customdata, debit_traite=v$Q12345)
         }
       })
