@@ -105,18 +105,28 @@ mod_vilaine_aval_server <- function(id){
               #shinyCatch({
               validate(need(exists("pool"), "Il faut une connexion vers la base"))
               shinybusy::show_modal_spinner(text="chargement base") # show the modal window
-       
+              tags_niveaux <- get_tags(type="niveau")               
+            
+              if (length(tags_niveaux)>0){
               va$niveaux <-
                   load_niveaux(
                       debut = as.POSIXct(strptime(input$va_datedebut-1, format = "%Y-%m-%d")),
                       fin = as.POSIXct(strptime(input$va_datefin, format = "%Y-%m-%d")),
-                      tags = get_tags(type="niveau") ,
+                      tags = tags_niveaux,
                       con = pool
                   )
+              } else {
+                va$niveaux <- data.frame()
+              }
+              tags_debits <- get_tags(type="debit") 
+              if (length(tags_debits)>0){
               va$debits <- load_debits(debut = as.POSIXct(strptime(input$va_datedebut-1, format = "%Y-%m-%d")),
                   fin = as.POSIXct(strptime(input$va_datefin, format = "%Y-%m-%d")),
-                  tags = get_tags(type="debit") ,
+                  tags = tags_debits ,
                   con = pool)
+            } else {
+              va$debits <- data.frame()
+            }
              
               shinybusy::remove_modal_spinner() # remove it when done
               # TODO use attributes(niveaux)$libelle 
@@ -124,6 +134,7 @@ mod_vilaine_aval_server <- function(id){
             })
         output$va_armchart_niveaux <- rAmCharts::renderAmCharts({
               validate(need(!is.null(va$niveaux), "cliquez sur le bouton OK pour charger des valeurs"))
+             if(nrow(va$niveaux)>0){
               rAmCharts::amTimeSeries(
                       va$niveaux, 
                       'horodate',
@@ -141,10 +152,12 @@ mod_vilaine_aval_server <- function(id){
                       legend = TRUE           
                   ) %>%
                   rAmCharts::setExport(enabled = TRUE)  
+              }
             })
         
         output$va_armchart_debits <- rAmCharts::renderAmCharts({
               validate(need(!is.null(va$debits), "cliquez sur le bouton OK pour charger des valeurs"))
+                 if (nrow(va$debits)>0){ 
              rAmCharts::amTimeSeries(
                       va$debits,
                       'horodate',
@@ -161,7 +174,8 @@ mod_vilaine_aval_server <- function(id){
                       linewidth = 0.2,
                       legend = TRUE           
                   ) %>%
-                  rAmCharts::setExport(enabled = TRUE)  
+                  rAmCharts::setExport(enabled = TRUE)
+              }
             })
       })
 }
