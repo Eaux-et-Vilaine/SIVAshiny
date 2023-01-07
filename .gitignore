@@ -47,7 +47,7 @@ vignettes/*.pdf
 .here
 .project
 .settings
-
+.dbeaver
 
 # not shared
 inst/golem-config.yml

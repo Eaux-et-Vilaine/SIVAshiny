@@ -94,30 +94,19 @@ app_ui <- function(request) {
           ),
           mod_passe_ui("mod_passe_1"),
           #tabPanel("Passe à poissons (x)",          
-       
-          navbarMenu("A propos",
-              tabPanel("Table",
-                  DT::dataTableOutput("table")
-              ),
-              tabPanel("About",
-                  fluidRow(
-                      column(6,
-                          # changer au deployement
-                          includeMarkdown(app_sys("app/www/about.md"))
-                      ),
-                      column(3,
-                          img(class="img-polaroid",
-                              src=paste0("http://upload.wikimedia.org/",
-                                  "wikipedia/commons/9/92/",
-                                  "1919_Ford_Model_T_Highboy_Coupe.jpg")),
-                          tags$small(
-                              "Source: Barrage d'Arzal ",
-                              "Automobile Club's July 10, 2005 show at the ",
-                              "Endicott Estate in Dedham, MA by ",
-                              a(href="http://commons.wikimedia.org/wiki/User:Sfoskett",
-                                  "User:Sfoskett")
-                          )
+          
+          tabPanel("A propos",
+              fluidRow(
+                  column(4,
+                      # changer au deployement
+                      includeMarkdown(app_sys("app/www/about.md"))
+                  ),
+                  column(3,
+                      img(src="barrage.jpg"),
+                      tags$small(
+                          "Source: Barrage d'Arzal : Erwan Le Cornec"                             
                       )
+                  
                   )
               )
           )
