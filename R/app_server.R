@@ -9,7 +9,7 @@ app_server <- function(input, output, session) {
   # Vilaine aval ---------------------------------
   mod_vilaine_aval_server("mod_vilaine_aval_1")
   mod_passe_server("mod_passe_1")
-
+  mod_isac_server("mod_isac_1")
   
   # Barrage, calculs utilisant les fonctions SIVA.
   # plus données toutes les dix minutes

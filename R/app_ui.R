@@ -8,8 +8,12 @@ app_ui <- function(request) {
   tagList(
       # Leave this function for adding external resources
       golem_add_external_resources(),
+      # use this in non shinydashboard app
+      
+      useShinydashboard(),
       # Your application UI logic
       navbarPage(
+          #tags$script(src = "https://kit.fontawesome.com/abe2acc83c.js"),
           theme = bslib::bs_theme(version = 5, primary = "#00218f", success = "#33b5ff", 
               info = "#00C9C4", warning = "#ffb428", base_font = "Segoe UI Symbol", 
               heading_font = "Georgia", font_scale = NULL, `enable-gradients` = TRUE, 
@@ -86,11 +90,11 @@ app_ui <- function(request) {
                   )  
               )
           ),
-          tabPanel("Isac (x)",
+          mod_isac_ui("mod_isac_1"),
           
+          tabPanel("Trevelo (x)",          
           ),
-          tabPanel("Trevelo (x)",
-          
+          tabPanel("Pluviometrie (x)",          
           ),
           mod_passe_ui("mod_passe_1"),
           #tabPanel("Passe à poissons (x)",          

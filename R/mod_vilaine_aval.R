@@ -29,13 +29,14 @@ mod_vilaine_aval_ui <- function(id){
                   choices = list(
                       "Niveau Vilaine barrage" = "vilaine_barrage", 
                       "Niveau mer barrage" = "mer_barrage",
-                      "Niveau Redon ecluse"= "redon_ecluse",
-                      "Niveau Aucfer"="aucfer",
-                      "Niveau Molac" ="molac",
-                      "Niveau Le Gueslin"="legueslin",
-                      "Niveau Sixt"="sixtsuraff",
-                      "Niveau Pont de Cran"="pontdecran",
-                      "Niveau Guerouet"="guerouet"
+                      "Niveau Vilaine Redon ecluse"= "redon_ecluse",
+                      "Niveau Oust Aucfer"="aucfer",
+                      "Niveau Arz Molac" ="molac",
+                      "Niveau Oust le Gueslin"="legueslin",
+                      "Niveau Aff Sixt"="sixtsuraff",
+                      "Niveau Vilaine Pont de Cran"="pontdecran",
+                      "Niveau Vilaine Painfault"="painfault",
+                      "Niveau Isac Guerouet"="guerouet"
                   ),
                   inline=FALSE,
                   selected = c("vilaine_barrage","redon_ecluse","debitcran")),
@@ -77,7 +78,6 @@ mod_vilaine_aval_ui <- function(id){
 mod_vilaine_aval_server <- function(id){
   moduleServer( id, function(input, output, session){
         ns <- session$ns
-        # codes <- 
         va <- reactiveValues(niveaux = NULL, debits=NULL)
         get_tags <- function(type=c("niveau", "debit")){
           type = match.arg(type)
