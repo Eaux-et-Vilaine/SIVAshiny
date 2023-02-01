@@ -61,7 +61,7 @@ app_ui <- function(request) {
                           width = 10, 
                           tabPanel(title = "Graph jour",
                               value=2,                               
-                              h3("Volume journaliers au barrage"),
+                              h3("Volumes journaliers au barrage"),
                               shinycssloaders::withSpinner(plotly::plotlyOutput("bar_plotly_volume_jour")),
                               h3("Débit des vannes et volets"),
                               shinycssloaders::withSpinner(plotly::plotlyOutput("bar_plotly_journalier_vanne_volet"))

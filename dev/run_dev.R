@@ -1,5 +1,6 @@
 # Set options here
 
+
 setwd("C:\\workspace\\SIVAshiny")
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
 
@@ -12,7 +13,7 @@ options(shiny.port = httpuv::randomPort())
 
 # Document and reload your package
 golem::document_and_reload()
-options(shiny.error = browser)
+#options(shiny.error = browser)
 # Run the application
 SIVAshiny()
 

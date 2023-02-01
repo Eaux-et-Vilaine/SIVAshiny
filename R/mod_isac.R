@@ -32,7 +32,7 @@ mod_isac_ui <- function(id){
                       "Niveau Vilaine barrage" = "vilaine_barrage",
                       "Niveau Marais Isac" = "isac_niveau_marais",
                       "Niveau aval Isac 1 (Thénot)" = "isac_aval1",
-                      "Niveau amont Isac 1 (Thénot) = isac_amont1",
+                      "Niveau amont Isac 1 (Thénot)" = "isac_amont1",
                       "Niveau aval Isac 2 (Thénot)" = "isac_aval2",
                       "Niveau amont Isac 2 (Thénot)" = "isac_amont2",
                       "Fonct. cumulé pompe 1" = "isac_fonctionnement_cumul_p1",
@@ -54,33 +54,69 @@ mod_isac_ui <- function(id){
                       "pluvio_isac_10min"
                   )
               ),
+              
+              h5("Débits et analyse environnementale :"),
+              uiOutput(ns("isa_output_text")),
+              uiOutput(ns("isa_output_radio_amont")),
+              uiOutput(ns("isa_output_radio_aval")),
               shinyWidgets::actionBttn(
                   inputId = ns("bttn_isa"),
                   label = "OK",
                   style = "fill", 
                   color = "primary"					
               )
+          
+          
           ), #end sidebarpanel
-          mainPanel(width = 9,  
+          mainPanel(width = 9,    
+              
+              
+              h3("Niveau"),
               fluidRow(
-                  valueBoxOutput(ns("box_pluvio"), width=3),
-                  valueBoxOutput(ns("box_debit_pompes"), width=3),
-                  valueBoxOutput(ns("box_volume_pompes"), width=3)
+                  valueBoxOutput(ns("box_pluvio"), width=4),
+                  valueBoxOutput(ns("box_delta_h"), width=4)
+              
+              ),              
+              shinycssloaders::withSpinner(
+                  rAmCharts::amChartsOutput(
+                      outputId = ns("isa_rmarchart_niveau")
+                  )              
               ),
+              h3("Pompes"),
               fluidRow(
                   valueBoxOutput(ns("box_cout"), width=3),
                   valueBoxOutput(ns("box_cout_carbone"), width=3),
-                  valueBoxOutput(ns("box_delta_h"), width=3)
+                  valueBoxOutput(ns("box_debit_pompes"), width=3),
+                  valueBoxOutput(ns("box_volume_pompes"), width=3)
+              
               ),  
-              h3("Niveau"),
-              shinycssloaders::withSpinner(
-                  plotly::plotlyOutput(
-                      outputId = ns("isac_rmarchart_niveau")
-                  )              
-              ),
+              h3("Thénot"),              
               shinycssloaders::withSpinner(                    
                   plotly::plotlyOutput(
-                      outputId = ns("isa_fonct_thenot")))
+                      outputId = ns("isa_fonct_thenot"))
+              ),
+              h3("Indicateurs"),              
+             valueBoxOutput(ns("box_continuite"), width=4),                        
+              shinycssloaders::withSpinner(                    
+                  plotOutput(
+                      outputId = ns("isa_continuite"),
+                      height=100,
+                      width="90%"
+                  )
+              ),
+              valueBoxOutput(ns("box_ornitho"), width=4),
+              shinycssloaders::withSpinner(                    
+                  plotOutput(
+                      outputId = ns("isa_avifaune"),
+                      height=100,
+                      width="90%")),
+              valueBoxOutput(ns("box_brochet"), width=4),
+              shinycssloaders::withSpinner(                    
+                  plotOutput(
+                      outputId = ns("isa_brochet"),
+                      height=100,
+                      width="90%")
+              )
           )# end main panel
       )) 
 }
@@ -91,7 +127,7 @@ mod_isac_ui <- function(id){
 mod_isac_server <- function(id){
   moduleServer( id, function(input, output, session){
         ns <- session$ns
-        va <- reactiveValues(isac_dat = NULL)
+        va <- reactiveValues(isac_dat = NULL, isac_dat1 = NULL)
         
         get_tags <- function(){          
           codes <- input$isa_choix
@@ -102,10 +138,36 @@ mod_isac_server <- function(id){
           return(tags)          
         }
         
+        
+        output$isa_output_radio_amont <- renderUI({
+              
+              codes <- input$isa_choix               
+              isac_niveaux_amont <- isac[c(12,10,17,2),]
+              isac_niveaux_amont <- isac_niveaux_amont[isac_niveaux_amont$code %in% codes,]              
+              radioButtons(inputId=ns("isa_radio_debit_amont"),
+                  label = "Niveau amont:",
+                  selected = isac_niveaux_amont$code[1],
+                  choiceValues = isac_niveaux_amont$code, 
+                  choiceNames = isac_niveaux_amont$libelle)
+            })
+        output$isa_output_radio_aval <- renderUI({
+              codes <- input$isa_choix            
+              isac_niveaux_aval <- isac[c(1,9,11,3,4),]
+              isac_niveaux_aval <- isac_niveaux_aval[isac_niveaux_aval$code %in% codes,]              
+              radioButtons(inputId = ns("isa_radio_debit_aval"),
+                  label = "Niveau aval:",
+                  selected = isac_niveaux_aval$code[1],
+                  choiceValues = isac_niveaux_aval$code, 
+                  choiceNames = isac_niveaux_aval$libelle)           
+            })
+        
+        
+        
         observeEvent(input$bttn_isa,{              
               
               validate(need(exists("pool"), "Il faut une connexion vers la base"))
-              tags_isac <- get_tags()               
+              
+              tags_isac <- get_tags()      
               
               if (length(tags_isac)>0){
                 shinybusy::show_modal_spinner(text="chargement base") # show the modal window
@@ -118,7 +180,7 @@ mod_isac_server <- function(id){
                     )
                 shinybusy::remove_modal_spinner()
                 # calculs des débits et conso + filtration données
-               
+                
                 isac_dat <- traitement_isac(isac_dat)
                 
                 
@@ -131,7 +193,31 @@ mod_isac_server <- function(id){
               
               
               va$isac_dat <- isac_dat   
+              
+              
+              
+              
+              
+              
             })
+#    calcul des débits quand le choix des radiobutton pour les niveaux amont et aval est effectué
+        
+        observe({
+              validate(need(!is.null(va$isac_dat), "")) 
+              isac_dat <- va$isac_dat
+              hamont = va$isac_dat[,input$isa_radio_debit_amont]
+              haval = va$isac_dat[,input$isa_radio_debit_aval]
+              hvanne1 = va$isac_dat$isac_position_vanne_1
+              hvanne2 = va$isac_dat$isac_position_vanne_2
+              debit <-  debit_vannes_isac(
+                  hamont = hamont,
+                  haval = haval,
+                  hvanne1 = hvanne1,
+                  hvanne2 = hvanne2
+              )
+              isac_dat1 <- cbind(isac_dat, debit)
+              va$isac_dat1 <- isac_dat1
+            }, label= "calcul_debit_isac")
         
         output$box_pluvio <- renderValueBox({
               validate(need(!is.null(va$isac_dat), ""))              
@@ -148,18 +234,13 @@ mod_isac_server <- function(id){
                 }
                 string_pluvio <- sprintf("Isac %s <br/> Arzal %s",pluvio_isac,pluvio_barrage)    
                 valueBox(
-                    value=HTML(string_pluvio),
-                    subtitle=p("Pluviométrie",style = 'color:GhostWhite;font-size: 150%;'),
+                    value=p(HTML(string_pluvio), style = 'font-size: 80%;'),
+                    subtitle=h5("Pluviométrie",style = 'color:GhostWhite'),
                     icon=icon("cloud-rain"),
                     color="purple")
-              } else {
-                valueBox(
-                    value="Pas de données",
-                    subtitle="Pluvio totale isac",
-                    icon=icon("cloud-rain"),
-                    color="black")
-              }
+              } 
             })
+        
         output$box_debit_pompes <- renderValueBox({
               validate(need(!is.null(va$isac_dat), ""))              
               if(nrow(va$isac_dat)>0){                
@@ -172,20 +253,13 @@ mod_isac_server <- function(id){
                 } else {
                   Q_pompes <- "Non calculé"
                 }                
-                  valueBox(
-                    value=p(Q_pompes, style = 'color:LemonChiffon;font-size: 100%;'), 
+                valueBox(
+                    value=p(Q_pompes, style = 'color:LemonChiffon;font-size: 90%;'), 
                     subtitle=h5("Débit pompes", style='color:LightCyan'),
                     icon=icon("arrow-up-from-water-pump"), 
                     color="navy"
                 )
-              } else {
-                valueBox(
-                    value="",
-                    subtitle="Débit pompes",
-                    icon=icon("arrow-up-from-water-pump"), 
-                    color="aqua"
-                )
-              }     
+              } 
             })
         
         output$box_volume_pompes <- renderValueBox({
@@ -206,14 +280,7 @@ mod_isac_server <- function(id){
                     icon=icon("arrow-up-from-water-pump"), 
                     color="aqua"
                 )
-              } else {
-                valueBox(
-                    value="",
-                    subtitle="Volume pompes",
-                    icon=icon("arrow-up-from-water-pump"), 
-                    color="aqua"
-                )
-              }     
+              } 
             })
         
         output$box_cout <- renderValueBox({
@@ -230,18 +297,11 @@ mod_isac_server <- function(id){
                 }                
                 valueBox(
                     value=h3(cout, style = 'color:DarkGreen;'),
-                    subtitle="Coût en électricité des pompes €",
+                    subtitle=h5("Coût €",style='color:GhostWhite;'),
                     icon=icon("euro-sign"), 
                     color="teal"
                 )
-              } else {
-                valueBox(
-                    value="",
-                    subtitle="Coût €",
-                    icon=icon("euro-sign"), 
-                    color="teal"
-                )
-              }     
+              }  
             })
         
         output$box_cout_carbone <- renderValueBox({
@@ -252,29 +312,28 @@ mod_isac_server <- function(id){
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  cout_carbone <- paste(sum(va$isac_dat$cout_carbone, na.rm=TRUE),"kg CO2")
+                  cout_carbone <- sum(va$isac_dat$cout_carbone, na.rm=TRUE)
+                  cout_carbone_txt <- paste(round(cout_carbone),"kg CO2")
+                  color <- "grey"
+                  if (cout_carbone == 0) color <- "lime"
+                  if (cout_carbone > 0) color <- "orange"
+                  
                 } else {
                   cout_carbone <- "Non calculé"
+                  color <- "grey"
                 }                
                 valueBox(
-                    value=h3(cout_carbone),
-                    subtitle="Coût carbone des pompes",
-                    icon=icon("earth-europe", class="fa-duotone"), 
-                    color="red"
+                    value=h3(cout_carbone_txt),
+                    subtitle=h5("Coût carbone",style='color:MidnightBlue;'),
+                    icon=icon("earth-europe"), 
+                    color=color
                 )
-              } else {
-                valueBox(
-                    value="",
-                    subtitle="Coût carbone",
-                    icon=icon("earth-europe", class="fa-duotone"), 
-                    color="red"
-                )
-              }     
+              } 
             })
         
         output$box_delta_h <- renderValueBox({
               validate(need(!is.null(va$isac_dat), ""))              
-              if(nrow(va$isac_dat)>0){                
+              if(nrow(va$isac_dat)>0){   
                 if (all(c("isac_amont2",
                             "guenrouet") %in%
                         colnames(va$isac_dat))){
@@ -283,24 +342,245 @@ mod_isac_server <- function(id){
                   delta_h <- "Non calculé"
                 }                
                 valueBox(
-                    value=h3(delta_h, style='color:Olive;'),
-                    subtitle="Delta H moyen au Thénot",
+                    value=p(delta_h, style='color:Olive;font-size: 100%;'),
+                    subtitle=h5("Delta H moyen Thénot",style='color:GhostWhite;'),
                     icon=icon("bridge-water"), # fas fa-dot-circle
-                    color="orange"
+                    color="teal"
                 )
-              } else {
-                valueBox(
-                    value="",
-                    subtitle="Delta H moyen",
-                    icon=icon("bridge-water"), # fas fa-dot-circle
-                    color="orange"
-                )
-              }     
+              } 
             })
         
-
+        
+        output$box_continuite <- renderValueBox({ 
+              validate(need(!is.null(va$isac_dat1), ""))              
+              if(nrow(va$isac_dat1)>0){   
+                
+                isac_dat1 <- va$isac_dat1
+                transp <- isac_dat1 %>% group_by(mig) %>%
+                    summarize(N=n()) %>% 
+                    ungroup() %>%
+                    mutate(perc=N/sum(N))
+                if (transp$perc[transp$mig=="1-transparente"]>0.5) color <- "green"
+                if (transp$perc[transp$mig=="1-transparente"]<=0.5 & 
+                    transp$perc[transp$mig=="1-transparente"]>0.2) color <- "orange"
+                if (transp$perc[transp$mig=="1-transparente"]<=0.2 ) color <- "red"
+                
+                transptxt <- sprintf("transparent %s %% <br/> difficile %s %%", round(transp$perc[transp$mig=="1-transparente"]*100), 
+                    round(transp$perc[transp$mig=="2-difficile"]*100)) 
+                valueBox(
+                    value = p(HTML(transptxt), style = 'font-size: 80%;'),
+                    subtitle = h5("Continuité piscicole",style='color:GhostWhite;'),
+                    icon = icon("fish"), 
+                    color = color)
+              }
+            })
+        
+        output$box_ornitho <- renderValueBox({                        
+              validate(need(!is.null(va$isac_dat1), ""))  
+              isac_dat1 <- va$isac_dat1
+              isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
+              avi <- isac_dat1 %>% group_by(avifaune) %>%
+                  summarize(N=n()) %>% 
+                  ungroup() %>%
+                  mutate(perc=N/sum(N))
+              avi_sel <- avi$avifaune[which.max(avi$perc)]
+              avi_value <- 100 * avi$perc[which.max(avi$perc)]
+              avi_txt <- sprintf("%s (%s %%)", avi_sel, round(avi_value)) 
+              color <- switch(as.character(avi_sel), 
+                  "0-bon"="blue",
+                  "1-moyen"="orange",
+                  "2-mauvais"="red",
+                  "3-hors-période"="teal",
+                  "4-inconnu"="grey")
+              valueBox(
+                  value = p(avi_txt, style = 'color:Navy;font-size: 80%;'),
+                  subtitle = h5("Accueil avifaune",style='color:GhostWhite;'),
+                  icon=icon("kiwi-bird"), 
+                  color=color)
+              
+            })
+        
+        output$box_brochet <- renderValueBox({                        
+              validate(need(!is.null(va$isac_dat1), ""))              
+              if(nrow(va$isac_dat1)>0){ 
+                
+                isac_dat1 <- va$isac_dat1
+                isac_dat1$brochet <- indicateur_brochet_isac(isac_dat1,                     
+                    niveau_marais=input$isa_radio_debit_amont)
+                bro <- isac_dat1 %>% group_by(brochet) %>%
+                    summarize(N=n()) %>% 
+                    ungroup() %>%
+                    mutate(perc=N/sum(N))
+                bro_sel <- bro$brochet[which.max(bro$perc)]
+                bro_value <- 100 * bro$perc[which.max(bro$perc)]
+                bro_txt <- sprintf("%s (%s %%)", bro_sel, round(bro_value)) 
+                color <- switch(as.character(bro_sel), 
+                    "0-repro-bon"="blue",
+                    "1-repro-moyen"="orange",
+                    "2-repro-mauvais"="red",
+                    "3-emergence-bon"="lime",
+                    "4-emergence-moyen"="yellow",
+                    "5-emergence-mauvais"="maroon",
+                    "6-inconnu/ hors période"="grey")
+                
+                valueBox(
+                    value=h4(bro_txt, style = 'color:DarkGreen;'),
+                    subtitle=h5("Reproduction brochet",style='color:White;'),
+                    icon=icon("fish"), 
+                    color=color)
+              }
+            })
+        
+        # Niveaux ------------------------------------------------------------- 
         
         
+        output$isa_rmarchart_niveau <- rAmCharts::renderAmCharts({
+              validate(need(!is.null(va$isac_dat), "cliquez sur le bouton OK pour charger des valeurs"))
+              if(nrow(va$isac_dat)>0){
+                which_niveau <- grep("Niveau", attributes(va$isac_dat)$libelle)+1
+                isac_dat_niveau <- va$isac_dat %>%  
+                    select("horodate",all_of(which_niveau))                
+                
+                rAmCharts::amTimeSeries(
+                        isac_dat_niveau, 
+                        'horodate',
+                        colnames(isac_dat_niveau)[2:ncol(isac_dat_niveau)],
+                        bullet = "round",
+                        color =   randomcoloR::distinctColorPalette(ncol(isac_dat_niveau)-1),
+                        #backgroundColor = "#40555E",
+                        #backgroundAlpha = 0.4,
+                        bulletSize =  6,
+                        aggregation = "Average",
+                        #fillAlphas = 0.2,
+                        groupToPeriods = c('10mm', '30mm', 'hh', 'DD', 'MAX'),
+                        #  c('hh', 'DD', '10DD','MM','MAX'),
+                        linewidth = 0.4,
+                        legend = TRUE           
+                    ) %>%
+                    rAmCharts::setExport(enabled = TRUE)
+              }
+            })
+        
+        ## Debits ------------------------------------------------------------- 
+        
+        
+        output$isa_fonct_thenot <- plotly::renderPlotly({
+              validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
+              if(nrow(va$isac_dat1)>0){
+                isac_dat1 <- va$isac_dat1
+                
+                plotly::ggplotly(
+                    ggplot(isac_dat1) + 
+                        geom_line(aes(x=horodate, y= Q, colour="Q-vannes")) +
+                        geom_line(aes(x=horodate, y = Q_pompes, colour="Q-pompes")) +
+                        scale_colour_manual("Débit", values=c("Q-vannes"=bleu_EV,"Q-pompes"=orange_EV)) +
+                        theme_bw()
+                )
+              }
+            })
+        
+        
+        output$isa_continuite <- renderPlot({
+              validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
+              if(nrow(va$isac_dat1)>0){               
+                isac_dat1 <- va$isac_dat1
+                ggplot(isac_dat1) +
+                    geom_rect(
+                        aes(
+                            xmin = horodate,
+                            xmax = horodate + as.difftime(10, units = "mins"),
+                            ymin = -30,
+                            ymax = -35,
+                            fill = mig
+                        )) +
+                    scale_fill_manual("Transparence migratoire", values = c("1-transparente"="blue",
+                            "2-difficile"="orange",
+                            "3-bloquee"="red",
+                            "4-inf5cm"="purple"))+
+                    theme_minimal() +
+                    
+                    theme(legend.position="bottom",
+#                        legend.title = element_text(size=12),
+#                        legend.text = element_text(size=12),
+#                        legend.key.height =unit(1, 'cm'),
+#                        legend.key.width =unit(1, 'cm'),
+                        legend.direction = "horizontal",
+                        axis.line.x = element_blank(), axis.line.y = element_blank(), 
+                        axis.text.x = element_blank(), axis.text.y = element_blank(), 
+                        axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), 
+                        axis.title.x = element_blank(), axis.title.y = element_blank(),
+                        panel.grid.major = element_blank(),
+                        panel.grid.minor = element_blank())
+                
+              }
+            })
+        
+        # TODO faut il une sonde différente ?        
+        output$isa_avifaune <- renderPlot({
+              validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
+              if(nrow(va$isac_dat1)>0){
+                isac_dat1 <- va$isac_dat1   
+                isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
+                ggplot(isac_dat1) +
+                    geom_rect(
+                        aes(
+                            xmin = horodate,
+                            xmax = horodate + as.difftime(10, units = "mins"),
+                            ymin = -40,
+                            ymax = -45,
+                            fill = avifaune
+                        )) +
+                    scale_fill_manual("Accueil avifaune", values = c("0-bon"="blue",
+                            "1-moyen"="orange",
+                            "2-mauvais"="red",
+                            "3-hors période"="white",
+                            "4-inconnu"="white"))+
+                    theme_minimal() +
+                    theme(axis.line.x = element_blank(), axis.line.y = element_blank(), 
+                        axis.text.x = element_blank(), axis.text.y = element_blank(), 
+                        axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), 
+                        axis.title.x = element_blank(), axis.title.y = element_blank())+
+                    theme(legend.position="bottom",                        
+                        legend.direction = "horizontal",
+                        panel.grid.major = element_blank(),
+                        panel.grid.minor = element_blank())
+              }
+            })
+                output$isa_brochet <- renderPlot({
+                      validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
+                      if(nrow(va$isac_dat1)>0){
+                        isac_dat1 <- va$isac_dat1
+                        isac_dat1$brochet <- indicateur_brochet_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
+                        ggplot(isac_dat1) +
+                            geom_rect(
+                                aes(
+                                    xmin = horodate,
+                                    xmax = horodate + as.difftime(10, units = "mins"),
+                                    ymin = -50,
+                                    ymax = -55,
+                                    fill = brochet
+                                )) +
+                            scale_fill_manual("Repro brochet", values = c("0-repro-bon"="blue",
+                                    "1-repro-moyen"="orange",
+                                    "2-repro-mauvais"="red",
+                                    "3-emergence-bon"="cyan",
+                                    "4-emergence-moyen"="gold",
+                                    "5-emergence-mauvais"="firebrick",
+                                    "6-inconnu/ hors période"="white")) +
+                            
+                            
+                            theme_minimal() +
+                            theme(axis.line.x = element_blank(), axis.line.y = element_blank(), 
+                                axis.text.x = element_blank(), axis.text.y = element_blank(), 
+                                axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), 
+                                axis.title.x = element_blank(), axis.title.y = element_blank())+
+                            theme(legend.position="bottom",                               
+                                legend.direction = "horizontal",
+                                panel.grid.major = element_blank(),
+                                panel.grid.minor = element_blank())
+                      }
+                    })
+      
       })
 }
 

@@ -12,6 +12,7 @@ library(plotly)
 library(dplyr)
 library(stringr)
 library(summaryBox) # remotes::install_github("deepanshu88/summaryBox")
+library(pool)
 #library(crosstalk)
 #source("R/app_config.R")
 pool <- pool::dbPool(
@@ -23,7 +24,7 @@ pool <- pool::dbPool(
   port=get_golem_config("portmysql.")
 )
 onStop(function() {
-      poolClose(pool)
+      pool::poolClose(pool)
     })
 
 bleu_EV <- "#00218f"
