@@ -26,15 +26,15 @@ mod_isac_ui <- function(id){
               checkboxGroupInput(ns("isa_choix"), 
                   label = h5("Variables :"),
                   choices = list(
-                      "Niveau Pont de Cran"="pontdecran",
-                      "Niveau Isac Guenrouet"="guenrouet",
-                      "Niveau Redon ecluse"= "redon_ecluse",
-                      "Niveau Vilaine barrage" = "vilaine_barrage",
+                      "Niveau Vilaine au Pont de Cran"="pontdecran",
+                      "Niveau Isac à Guenrouet"="guenrouet",
+                      "Niveau Vilaine écluse Redon"= "redon_ecluse",
+                      "Niveau Vilaine Arzal" = "vilaine_barrage",
                       "Niveau Marais Isac" = "isac_niveau_marais",
-                      "Niveau aval Isac 1 (Thénot)" = "isac_aval1",
-                      "Niveau amont Isac 1 (Thénot)" = "isac_amont1",
-                      "Niveau aval Isac 2 (Thénot)" = "isac_aval2",
-                      "Niveau amont Isac 2 (Thénot)" = "isac_amont2",
+                      "Niveau Vilaine aval Prévert (1)" = "isac_aval1",
+                      "Niveau Isac amont Prévert (1)" = "isac_amont1",
+                      "Niveau Vilaine aval Prévert (2)" = "isac_aval2",
+                      "Niveau Isac amont Prévert (2)" = "isac_amont2",
                       "Fonct. cumulé pompe 1" = "isac_fonctionnement_cumul_p1",
                       "Fonct. cumulé pompe 3" = "isac_fonctionnement_cumul_p3",
                       "Position vanne 1" = "isac_position_vanne_1",
@@ -45,6 +45,7 @@ mod_isac_ui <- function(id){
                   selected = c("pontdecran",
                       "guenrouet",
                       "isac_niveau_marais",
+                      "isac_aval1",
                       "isac_amont2",
                       "isac_fonctionnement_cumul_p1",
                       "isac_fonctionnement_cumul_p3",
@@ -59,6 +60,7 @@ mod_isac_ui <- function(id){
               uiOutput(ns("isa_output_text")),
               uiOutput(ns("isa_output_radio_amont")),
               uiOutput(ns("isa_output_radio_aval")),
+              uiOutput(ns("isa_output_radio_marais")),
               shinyWidgets::actionBttn(
                   inputId = ns("bttn_isa"),
                   label = "OK",
@@ -69,54 +71,68 @@ mod_isac_ui <- function(id){
           
           ), #end sidebarpanel
           mainPanel(width = 9,    
-              
-              
-              h3("Niveau"),
-              fluidRow(
-                  valueBoxOutput(ns("box_pluvio"), width=4),
-                  valueBoxOutput(ns("box_delta_h"), width=4)
-              
-              ),              
-              shinycssloaders::withSpinner(
-                  rAmCharts::amChartsOutput(
-                      outputId = ns("isa_rmarchart_niveau")
-                  )              
-              ),
-              h3("Pompes"),
-              fluidRow(
-                  valueBoxOutput(ns("box_cout"), width=3),
-                  valueBoxOutput(ns("box_cout_carbone"), width=3),
-                  valueBoxOutput(ns("box_debit_pompes"), width=3),
-                  valueBoxOutput(ns("box_volume_pompes"), width=3)
-              
-              ),  
-              h3("Thénot"),              
-              shinycssloaders::withSpinner(                    
-                  plotly::plotlyOutput(
-                      outputId = ns("isa_fonct_thenot"))
-              ),
-              h3("Indicateurs"),              
-             valueBoxOutput(ns("box_continuite"), width=4),                        
-              shinycssloaders::withSpinner(                    
-                  plotOutput(
-                      outputId = ns("isa_continuite"),
-                      height=100,
-                      width="90%"
+              shinydashboard::tabBox(                          
+                  id= "ttabs_isa", 
+                  width = 10, 
+                  tabPanel(title = "Graphiques",
+                      value=2, 
+                      h3("Niveau"),
+                      fluidRow(
+                          valueBoxOutput(ns("box_pluvio"), width=4),
+                          valueBoxOutput(ns("box_delta_h"), width=4)
+                      
+                      ),              
+                      shinycssloaders::withSpinner(
+                          rAmCharts::amChartsOutput(
+                              outputId = ns("isa_rmarchart_niveau")
+                          )              
+                      ),
+                      h3("Pompes"),
+                      fluidRow(
+                          valueBoxOutput(ns("box_cout"), width=3),
+                          valueBoxOutput(ns("box_cout_carbone"), width=3),
+                          valueBoxOutput(ns("box_debit_pompes"), width=3),
+                          valueBoxOutput(ns("box_volume_pompes"), width=3)
+                      
+                      ),  
+                      h3("Vannage du Prévert (Théhillac)"),              
+                      shinycssloaders::withSpinner(                    
+                          plotly::plotlyOutput(
+                              outputId = ns("isa_fonct_thenot"))
+                      ),
+                      h3("Indicateurs"),              
+                      valueBoxOutput(ns("box_continuite"), width=4),                        
+                      shinycssloaders::withSpinner(                    
+                          plotOutput(
+                              outputId = ns("isa_continuite"),
+                              height=100,
+                              width="90%"
+                          )
+                      ),
+                      valueBoxOutput(ns("box_ornitho"), width=4),
+                      shinycssloaders::withSpinner(                    
+                          plotOutput(
+                              outputId = ns("isa_avifaune"),
+                              height=100,
+                              width="90%")),
+                      valueBoxOutput(ns("box_brochet"), width=4),
+                      shinycssloaders::withSpinner(                    
+                          plotOutput(
+                              outputId = ns("isa_brochet"),
+                              height=100,
+                              width="90%")
+                      )
+                  ), # end tab panel
+                  tabPanel(title = "Tableaux",
+                      value=3,
+                      h2("Niveaux, débits et indicateurs"),
+                      shinycssloaders::withSpinner(DT::DTOutput("isa_table"))
+                  ),
+                  tabPanel(title = "Informations",
+                      value=3,
+                      includeMarkdown(app_sys("app/www/isac.md"))
                   )
-              ),
-              valueBoxOutput(ns("box_ornitho"), width=4),
-              shinycssloaders::withSpinner(                    
-                  plotOutput(
-                      outputId = ns("isa_avifaune"),
-                      height=100,
-                      width="90%")),
-              valueBoxOutput(ns("box_brochet"), width=4),
-              shinycssloaders::withSpinner(                    
-                  plotOutput(
-                      outputId = ns("isa_brochet"),
-                      height=100,
-                      width="90%")
-              )
+              )#end tabBox
           )# end main panel
       )) 
 }
@@ -152,7 +168,7 @@ mod_isac_server <- function(id){
             })
         output$isa_output_radio_aval <- renderUI({
               codes <- input$isa_choix            
-              isac_niveaux_aval <- isac[c(1,9,11,3,4),]
+              isac_niveaux_aval <- isac[c(9,1,11,3,4),]
               isac_niveaux_aval <- isac_niveaux_aval[isac_niveaux_aval$code %in% codes,]              
               radioButtons(inputId = ns("isa_radio_debit_aval"),
                   label = "Niveau aval:",
@@ -160,12 +176,23 @@ mod_isac_server <- function(id){
                   choiceValues = isac_niveaux_aval$code, 
                   choiceNames = isac_niveaux_aval$libelle)           
             })
+        output$isa_output_radio_marais <- renderUI({
+              codes <- input$isa_choix            
+              isac_niveaux_marais <- isac[c(17,2,12,10),]
+              isac_niveaux_marais <- isac_niveaux_marais[isac_niveaux_marais$code %in% codes,]              
+              radioButtons(inputId = ns("isa_radio_marais"),
+                  label = "Niveau marais:",
+                  selected = isac_niveaux_marais$code[1],
+                  choiceValues = isac_niveaux_marais$code, 
+                  choiceNames = isac_niveaux_marais$libelle)           
+            })
         
         
         
         observeEvent(input$bttn_isa,{              
               
               validate(need(exists("pool"), "Il faut une connexion vers la base"))
+              validate(need(input$isa_datefin>input$isa_datedebut, "la date de fin doit être supérieure à la date de début"))
               
               tags_isac <- get_tags()      
               
@@ -204,6 +231,9 @@ mod_isac_server <- function(id){
         
         observe({
               validate(need(!is.null(va$isac_dat), "")) 
+              # ne relancer qu'après avoir cliqué sur le bouton.
+              validate(need(input$isa_radio_debit_amont %in%colnames(va$isac_dat), "appuyer sur le bouton"))
+              validate(need(input$isa_radio_debit_aval %in%colnames(va$isac_dat),"appuyer sur le bouton"))
               isac_dat <- va$isac_dat
               hamont = va$isac_dat[,input$isa_radio_debit_amont]
               haval = va$isac_dat[,input$isa_radio_debit_aval]
@@ -249,7 +279,7 @@ mod_isac_server <- function(id){
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  Q_pompes <- paste(mean(va$isac_dat$Q_pompes, na.rm=TRUE),"m3/s")
+                  Q_pompes <- paste(round(mean(va$isac_dat$Q_pompes, na.rm=TRUE)),"m3/s")
                 } else {
                   Q_pompes <- "Non calculé"
                 }                
@@ -270,7 +300,7 @@ mod_isac_server <- function(id){
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  V_pompes <- paste(sum(va$isac_dat$Q_pompes*600, na.rm=TRUE),"m3/s")
+                  V_pompes <- paste(round(sum(va$isac_dat$Q_pompes*600, na.rm=TRUE)),"m3/s")
                 } else {
                   V_pompes <- "Non calculé"
                 }                
@@ -291,7 +321,7 @@ mod_isac_server <- function(id){
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  cout <- paste(sum(va$isac_dat$cout_euros, na.rm=TRUE),"€")
+                  cout <- paste(round(sum(va$isac_dat$cout_euros, na.rm=TRUE)),"€")
                 } else {
                   cout <- "Non calculé"
                 }                
@@ -314,13 +344,13 @@ mod_isac_server <- function(id){
                         colnames(va$isac_dat))){
                   cout_carbone <- sum(va$isac_dat$cout_carbone, na.rm=TRUE)
                   cout_carbone_txt <- paste(round(cout_carbone),"kg CO2")
-                  color <- "grey"
+                  color <- "black"
                   if (cout_carbone == 0) color <- "lime"
                   if (cout_carbone > 0) color <- "orange"
                   
                 } else {
                   cout_carbone <- "Non calculé"
-                  color <- "grey"
+                  color <- "black"
                 }                
                 valueBox(
                     value=h3(cout_carbone_txt),
@@ -343,7 +373,7 @@ mod_isac_server <- function(id){
                 }                
                 valueBox(
                     value=p(delta_h, style='color:Olive;font-size: 100%;'),
-                    subtitle=h5("Delta H moyen Thénot",style='color:GhostWhite;'),
+                    subtitle=h5("Delta H moyen",style='color:GhostWhite;'),
                     icon=icon("bridge-water"), # fas fa-dot-circle
                     color="teal"
                 )
@@ -378,7 +408,7 @@ mod_isac_server <- function(id){
         output$box_ornitho <- renderValueBox({                        
               validate(need(!is.null(va$isac_dat1), ""))  
               isac_dat1 <- va$isac_dat1
-              isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
+              isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_marais)
               avi <- isac_dat1 %>% group_by(avifaune) %>%
                   summarize(N=n()) %>% 
                   ungroup() %>%
@@ -390,8 +420,8 @@ mod_isac_server <- function(id){
                   "0-bon"="blue",
                   "1-moyen"="orange",
                   "2-mauvais"="red",
-                  "3-hors-période"="teal",
-                  "4-inconnu"="grey")
+                  "3-hors periode"="teal",
+                  "4-inconnu"="black")
               valueBox(
                   value = p(avi_txt, style = 'color:Navy;font-size: 80%;'),
                   subtitle = h5("Accueil avifaune",style='color:GhostWhite;'),
@@ -404,9 +434,10 @@ mod_isac_server <- function(id){
               validate(need(!is.null(va$isac_dat1), ""))              
               if(nrow(va$isac_dat1)>0){ 
                 
+                
                 isac_dat1 <- va$isac_dat1
                 isac_dat1$brochet <- indicateur_brochet_isac(isac_dat1,                     
-                    niveau_marais=input$isa_radio_debit_amont)
+                    niveau_marais=input$isa_radio_marais)
                 bro <- isac_dat1 %>% group_by(brochet) %>%
                     summarize(N=n()) %>% 
                     ungroup() %>%
@@ -421,7 +452,7 @@ mod_isac_server <- function(id){
                     "3-emergence-bon"="lime",
                     "4-emergence-moyen"="yellow",
                     "5-emergence-mauvais"="maroon",
-                    "6-inconnu/ hors période"="grey")
+                    "6-inconnu/hors periode"="black")
                 
                 valueBox(
                     value=h4(bro_txt, style = 'color:DarkGreen;'),
@@ -520,7 +551,7 @@ mod_isac_server <- function(id){
               validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
               if(nrow(va$isac_dat1)>0){
                 isac_dat1 <- va$isac_dat1   
-                isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
+                isac_dat1$avifaune <- indicateur_avifaune_isac(isac_dat1,  niveau_marais=input$isa_radio_marais)
                 ggplot(isac_dat1) +
                     geom_rect(
                         aes(
@@ -533,8 +564,8 @@ mod_isac_server <- function(id){
                     scale_fill_manual("Accueil avifaune", values = c("0-bon"="blue",
                             "1-moyen"="orange",
                             "2-mauvais"="red",
-                            "3-hors période"="white",
-                            "4-inconnu"="white"))+
+                            "3-hors periode"="white",
+                            "4-inconnu"="black"))+
                     theme_minimal() +
                     theme(axis.line.x = element_blank(), axis.line.y = element_blank(), 
                         axis.text.x = element_blank(), axis.text.y = element_blank(), 
@@ -546,41 +577,41 @@ mod_isac_server <- function(id){
                         panel.grid.minor = element_blank())
               }
             })
-                output$isa_brochet <- renderPlot({
-                      validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
-                      if(nrow(va$isac_dat1)>0){
-                        isac_dat1 <- va$isac_dat1
-                        isac_dat1$brochet <- indicateur_brochet_isac(isac_dat1,  niveau_marais=input$isa_radio_debit_amont)
-                        ggplot(isac_dat1) +
-                            geom_rect(
-                                aes(
-                                    xmin = horodate,
-                                    xmax = horodate + as.difftime(10, units = "mins"),
-                                    ymin = -50,
-                                    ymax = -55,
-                                    fill = brochet
-                                )) +
-                            scale_fill_manual("Repro brochet", values = c("0-repro-bon"="blue",
-                                    "1-repro-moyen"="orange",
-                                    "2-repro-mauvais"="red",
-                                    "3-emergence-bon"="cyan",
-                                    "4-emergence-moyen"="gold",
-                                    "5-emergence-mauvais"="firebrick",
-                                    "6-inconnu/ hors période"="white")) +
-                            
-                            
-                            theme_minimal() +
-                            theme(axis.line.x = element_blank(), axis.line.y = element_blank(), 
-                                axis.text.x = element_blank(), axis.text.y = element_blank(), 
-                                axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), 
-                                axis.title.x = element_blank(), axis.title.y = element_blank())+
-                            theme(legend.position="bottom",                               
-                                legend.direction = "horizontal",
-                                panel.grid.major = element_blank(),
-                                panel.grid.minor = element_blank())
-                      }
-                    })
-      
+        output$isa_brochet <- renderPlot({
+              validate(need(!is.null(va$isac_dat1), "cliquez sur le bouton OK pour charger des valeurs"))
+              if(nrow(va$isac_dat1)>0){
+                isac_dat1 <- va$isac_dat1
+                isac_dat1$brochet <- indicateur_brochet_isac(isac_dat1,  niveau_marais=input$isa_radio_marais)
+                ggplot(isac_dat1) +
+                    geom_rect(
+                        aes(
+                            xmin = horodate,
+                            xmax = horodate + as.difftime(10, units = "mins"),
+                            ymin = -50,
+                            ymax = -55,
+                            fill = brochet
+                        )) +
+                    scale_fill_manual("Repro brochet", values = c("0-repro-bon"="blue",
+                            "1-repro-moyen"="orange",
+                            "2-repro-mauvais"="red",
+                            "3-emergence-bon"="cyan",
+                            "4-emergence-moyen"="gold",
+                            "5-emergence-mauvais"="firebrick",
+                            "6-inconnu/hors periode"="black")) +
+                    
+                    
+                    theme_minimal() +
+                    theme(axis.line.x = element_blank(), axis.line.y = element_blank(), 
+                        axis.text.x = element_blank(), axis.text.y = element_blank(), 
+                        axis.ticks.x = element_blank(), axis.ticks.y = element_blank(), 
+                        axis.title.x = element_blank(), axis.title.y = element_blank())+
+                    theme(legend.position="bottom",                               
+                        legend.direction = "horizontal",
+                        panel.grid.major = element_blank(),
+                        panel.grid.minor = element_blank())
+              }
+            })
+        
       })
 }
 

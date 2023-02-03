@@ -104,6 +104,8 @@ mod_vilaine_aval_server <- function(id){
            
               #shinyCatch({
               validate(need(exists("pool"), "Il faut une connexion vers la base"))
+              validate(need(input$va_datefin>input$va_datedebut, "la date de fin doit être supérieure à la date de début"))
+              
               shinybusy::show_modal_spinner(text="chargement base") # show the modal window
               tags_niveaux <- get_tags(type="niveau")               
             
