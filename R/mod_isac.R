@@ -300,7 +300,7 @@ mod_isac_server <- function(id){
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  V_pompes <- paste(round(sum(va$isac_dat$Q_pompes*600, na.rm=TRUE)),"m3/s")
+                  V_pompes <- paste(round(sum(va$isac_dat$Q_pompes*600, na.rm=TRUE)),"m3")
                 } else {
                   V_pompes <- "Non calculé"
                 }                

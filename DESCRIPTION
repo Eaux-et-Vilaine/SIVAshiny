@@ -30,8 +30,7 @@ Imports:
     spsComps,
     shinythemes,
     pkgload,
-    randomcoloR
-    
+    randomcoloR    
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2
