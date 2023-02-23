@@ -126,7 +126,7 @@ mod_isac_ui <- function(id){
                   tabPanel(title = "Tableaux",
                       value=3,
                       h2("Niveaux, débits et indicateurs"),
-                      shinycssloaders::withSpinner(DT::DTOutput("isa_table"))
+                      shinycssloaders::withSpinner(DT::DTOutput(ns("isa_table")))
                   ),
                   tabPanel(title = "Informations",
                       value=3,
@@ -273,13 +273,13 @@ mod_isac_server <- function(id){
         
         output$box_debit_pompes <- renderValueBox({
               validate(need(!is.null(va$isac_dat), ""))              
-              if(nrow(va$isac_dat)>0){                
+              if(nrow(va$isac_dat)>0){  
                 if (all(c("isac_amont2",
                             "guenrouet",
                             "isac_fonctionnement_cumul_p1",
                             "isac_fonctionnement_cumul_p3") %in%
                         colnames(va$isac_dat))){
-                  Q_pompes <- paste(round(mean(va$isac_dat$Q_pompes, na.rm=TRUE)),"m3/s")
+                  Q_pompes <- paste(round(mean(va$isac_dat$Q_pompes, na.rm=TRUE),2),"m3/s")
                 } else {
                   Q_pompes <- "Non calculé"
                 }                
