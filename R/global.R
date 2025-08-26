@@ -15,7 +15,7 @@ library(pool)
 #library(crosstalk)
 #source("R/app_config.R")
 pool <- pool::dbPool(
-  drv = RMariaDB::MariaDB(),
+  drv = RMySQL::MySQL(),
   dbname = get_golem_config("dbnamemysql."),
   host = get_golem_config("hostmysql."),
   username = get_golem_config("umysql."),
