@@ -12,15 +12,17 @@ library(plotly)
 library(dplyr)
 library(stringr)
 library(pool)
+
 #library(crosstalk)
 #source("R/app_config.R")
 pool <- pool::dbPool(
-  drv = RMySQL::MySQL(),
+  drv =RMySQL::MySQL(),      #  RMariaDB::MariaDB(), 
   dbname = get_golem_config("dbnamemysql."),
   host = get_golem_config("hostmysql."),
   username = get_golem_config("umysql."),
   password = get_golem_config("pwdmysql."),
-  port=get_golem_config("portmysql.")
+  port=get_golem_config("portmysql."),
+  mysql = TRUE
 )
 onStop(function() {
       pool::poolClose(pool)

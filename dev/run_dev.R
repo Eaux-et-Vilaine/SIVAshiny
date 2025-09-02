@@ -1,5 +1,6 @@
 # Set options here
 
+# in powsershell type admin route add 1.100.1.0 mask 255.255.255.0 192.168.1.1
 
 setwd("C:\\workspace\\SIVAshiny")
 options(golem.app.prod = FALSE) # TRUE = production mode, FALSE = development mode
